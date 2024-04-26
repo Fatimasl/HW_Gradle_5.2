@@ -11,6 +11,7 @@ import lombok.val;
 import java.util.Locale;
 
 import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.post;
 
 public class DataGenerator {
     private static final RequestSpecification requestSpec = new RequestSpecBuilder()
@@ -29,17 +30,26 @@ public class DataGenerator {
         // TODO: отправить запрос на указанный в требованиях path, передав в body запроса объект user
         //  и не забудьте передать подготовленную спецификацию requestSpec.
         //  Пример реализации метода показан в условии к задаче.
+        given() // "дано"
+            .spec(requestSpec) // указываем, какую спецификацию используем
+            .body(user) // передаём в теле объект, который будет преобразован в JSON
+        .when() // "когда"
+            .post("/api/system/users") // на какой путь относительно BaseUri отправляем запрос
+        .then() // "тогда ожидаем"
+            .statusCode(200); // код 200 OK
     }
 
     public static String getRandomLogin() {
         // TODO: добавить логику для объявления переменной login и задания её значения, для генерации
         //  случайного логина используйте faker
+        String login = faker.name().username();
         return login;
     }
 
     public static String getRandomPassword() {
         // TODO: добавить логику для объявления переменной password и задания её значения, для генерации
         //  случайного пароля используйте faker
+        String password = faker.internet().password();
         return password;
     }
 
@@ -49,12 +59,19 @@ public class DataGenerator {
 
         public static RegistrationDto getUser(String status) {
             // TODO: создать пользователя user используя методы getRandomLogin(), getRandomPassword() и параметр status
+            RegistrationDto user = new RegistrationDto(
+                    getRandomLogin(),
+                    getRandomPassword(),
+                    status
+            );
             return user;
         }
 
         public static RegistrationDto getRegisteredUser(String status) {
             // TODO: объявить переменную registeredUser и присвоить ей значение возвращённое getUser(status).
             // Послать запрос на регистрацию пользователя с помощью вызова sendRequest(registeredUser)
+            RegistrationDto registeredUser = getUser(status); //сгенерировали рандомные данные пользователя + нужный статус
+            sendRequest(registeredUser); //отправили данные пользователя и статус на регистрацию через java -jar app-ibank.jar -P:profile=testapi
             return registeredUser;
         }
     }
